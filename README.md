@@ -7,7 +7,7 @@ This code utilizes Open AI GPT, Langchain, HNSWLib and Cheerio to fetch web cont
 If you are running this on Node.js 16, either:
 
 run your application with NODE_OPTIONS='--experimental-fetch' node ..., or
-install node-fetch and follow the instructions here
+install node-fetch and follow the instructions <a href="https://github.com/node-fetch/node-fetch#providing-global-access" target="_blank" rel="noopener noreferrer">here</a>
 
 If you are running this on Node.js 18 or 19, you do not need to do anything.
 
