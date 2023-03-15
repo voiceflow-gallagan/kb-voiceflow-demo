@@ -1,3 +1,7 @@
+# NiKo
+xfCcVs6SO4oqa2BKr5BNYmqffCyB1aCMFrsnyw1kHj8w
+backup
+
 # Logs
 logs
 *.log
@@ -102,3 +106,4 @@ dist
 
 # TernJS port file
 .tern-port
+package-lock.json
