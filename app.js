@@ -3,7 +3,6 @@ import http from 'http'
 import crypto from 'crypto'
 import { HNSWLib } from 'langchain/vectorstores'
 import { OpenAIEmbeddings } from 'langchain/embeddings'
-//import { TextLoader } from 'langchain/document_loaders'
 import { OpenAI } from 'langchain/llms'
 import { VectorDBQAChain } from 'langchain/chains'
 import { CheerioWebBaseLoader } from 'langchain/document_loaders'
@@ -45,14 +44,12 @@ app.post('/api/question', async (req, res) => {
 
   try {
     // Instantiate the OpenAI model
-    const llm = new PromptLayerOpenAI({
-      promptLayerApiKey: process.env.PROMPTLAYER_API_KEY,
+    const llm = new OpenAI({
       modelName: 'gpt-3.5-turbo',
       //modelName: 'gpt-3.5-turbo-0301',
-      concurrency: 15,
+      concurrency: 10,
       cache: true,
-      temperature: 0.1,
-      pl_tags: ['voiceflow', 'kb'],
+      temperature: 0,
     })
 
     // Load the Q&A map reduce chain
@@ -75,10 +72,9 @@ app.post('/api/parser', async (req, res) => {
   const docs = await loader.load()
   console.log(docs)
   const textSplitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 4000,
+    chunkSize: 2500,
     chunkOverlap: 200,
   })
-
   const docOutput = await textSplitter.splitDocuments(docs)
   // Create an AES-256-CBC cipher using the secret phrase and IV
   const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
@@ -104,9 +100,9 @@ app.post('/api/parser', async (req, res) => {
 
     if (exists) {
       already = true
-      console.log(`Metadata with source "${source}" already exists`)
+      console.log(`Source "${source}" already exists`)
     } else {
-      console.log(`No metadata with source "${source}" found`)
+      console.log(`Source "${source}" added to vector store`)
       await vectorStore.addDocuments(docOutput)
     }
   } catch (err) {

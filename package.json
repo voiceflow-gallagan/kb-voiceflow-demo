@@ -11,7 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "crypto": "^1.0.1",
     "dotenv": "^16.0.3",
     "express": "^4.17.1",
     "hnswlib-node": "^1.4.2",
