@@ -4,7 +4,8 @@
 This code utilizes Open AI GPT, Langchain, HNSWLib and Cheerio to fetch web content from URLs, create embeddings/vectors and save them in a local database. The knowledge base can then be used with GPT to answer questions.
 
 ## Quickstart Video
-https://www.loom.com/share/a4fccc7aac7d48548006570f6ac98576
+[![Watch the video](https://s3.amazonaws.com/com.voiceflow.studio/share/CleanShot-2023-03-17-at-14.03.29/CleanShot-2023-03-17-at-14.03.29.png)](https://www.loom.com/share/a4fccc7aac7d48548006570f6ac98576)
+
 
 ## Node.js
 If you are running this on Node.js 16, either:
