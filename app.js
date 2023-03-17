@@ -3,8 +3,9 @@ import http from 'http'
 import crypto from 'crypto'
 import { HNSWLib } from 'langchain/vectorstores'
 import { OpenAIEmbeddings } from 'langchain/embeddings'
+import { PromptTemplate } from 'langchain/prompts'
 import { OpenAI } from 'langchain/llms'
-import { VectorDBQAChain } from 'langchain/chains'
+import { loadChain, LLMChain, VectorDBQAChain } from 'langchain/chains'
 import { CheerioWebBaseLoader } from 'langchain/document_loaders'
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { Document } from 'langchain/document'
@@ -28,28 +29,45 @@ app.use(express.json())
 // Question endpoint
 app.post('/api/question', async (req, res) => {
   // Get the search query and APIKey from the request body
-  const { search, api } = req.body
+  const { question, apikey } = req.body
 
   // Create an AES-256-CBC cipher using the secret phrase and IV
   const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
 
   // Encrypt the APIKey using the cipher
-  let encrypted = cipher.update(api, 'utf8', 'base64')
+  let encrypted = cipher.update(apikey, 'utf8', 'base64')
   encrypted += cipher.final('base64')
 
+  // Instantiate the OpenAI model
+  const llm = new OpenAI({
+    modelName: 'gpt-3.5-turbo',
+    //modelName: 'gpt-4',
+    concurrency: 10,
+    cache: true,
+    temperature: 0,
+  })
+
   // Use the encrypted APIKey as the directory name
-  const directory = `./${encrypted}/`
+  const directory = `./${cleanFilePath(encrypted)}/`
   // Load the vector store from the same directory
-  const vectorStore = await HNSWLib.load(directory, new OpenAIEmbeddings())
+  let vectorStore
+  try {
+    vectorStore = await HNSWLib.load(directory, new OpenAIEmbeddings())
+  } catch (err) {
+    // If the vector store doesn't exist yet, create a default one
+    vectorStore = null
+  }
 
   try {
     // Instantiate the OpenAI model
-    const llm = new OpenAI({
+    const llm = new PromptLayerOpenAI({
+      promptLayerApiKey: process.env.PROMPTLAYER_API_KEY,
       modelName: 'gpt-3.5-turbo',
       //modelName: 'gpt-3.5-turbo-0301',
-      concurrency: 10,
+      concurrency: 15,
       cache: true,
-      temperature: 0,
+      temperature: 0.1,
+      pl_tags: ['voiceflow', 'kb'],
     })
 
     // Load the Q&A map reduce chain
@@ -58,8 +76,22 @@ app.post('/api/question', async (req, res) => {
       query: search,
     })
 
-    // Return the response to the user
-    res.json({ response })
+      // Return the response to the user
+      res.json({ response: response.text })
+    } else {
+      // We don't have a vector store yet, so we'll just use a template
+      const template =
+        "Your are a kind AI Assistant. Try to answer the following question: {question} If you don't know the answer, just say \"Hmm, I'm not sure.\" Don't try to make up an answer."
+      const prompt = new PromptTemplate({
+        template: template,
+        inputVariables: ['question'],
+      })
+      const chain = new LLMChain({ llm: llm, prompt: prompt })
+      const response = await chain.call({ question: question })
+
+      // Return the response to the user
+      res.json({ response: cleanText(response.text) })
+    }
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'Error processing the request' })
@@ -67,28 +99,31 @@ app.post('/api/question', async (req, res) => {
 })
 
 app.post('/api/parser', async (req, res) => {
-  const { url, api } = req.body
+  const { url, apikey } = req.body
   const loader = new CheerioWebBaseLoader(url)
   const docs = await loader.load()
-  console.log(docs)
-  const textSplitter = new RecursiveCharacterTextSplitter({
+
+  const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 2500,
     chunkOverlap: 200,
   })
+
   const docOutput = await textSplitter.splitDocuments(docs)
   // Create an AES-256-CBC cipher using the secret phrase and IV
   const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
-  // Encrypt the APIKey using the cipher
-  let encrypted = cipher.update(api, 'utf8', 'base64')
+  let encrypted = cipher.update(apikey, 'utf8', 'base64')
   encrypted += cipher.final('base64')
-  const directory = `./${encrypted}/`
+  const directory = `./${cleanFilePath(encrypted)}/`
 
+  // Create a new document for the URL
   let vectorStore
   let already = false
-  try {
-    vectorStore = await HNSWLib.load(directory, new OpenAIEmbeddings())
-    // Load the JSON file
 
+  try {
+    // Load the vector store from the exisiting directory
+    vectorStore = await HNSWLib.load(directory, new OpenAIEmbeddings())
+
+    // Load the JSON file
     const data = await fs.readFile(`${directory}docstore.json`)
     const db = JSON.parse(data)
 
@@ -98,6 +133,7 @@ app.post('/api/parser', async (req, res) => {
       ([id, { metadata }]) => metadata && metadata.source === source
     )
 
+    // Check if the source already exists
     if (exists) {
       already = true
       console.log(`Source "${source}" already exists`)
@@ -121,6 +157,21 @@ app.post('/api/parser', async (req, res) => {
     res.status(500).json({ message: 'Error processing conversation request' })
   }
 })
+
+function cleanFilePath(filePath) {
+  // Define a regular expression that matches all non-alphanumeric characters and hyphens
+  const regex = /[^a-zA-Z0-9\-]/g
+  // Replace all non-matching characters with an empty string
+  const cleanedFilePath = filePath.replace(regex, '')
+  return cleanedFilePath
+}
+
+function cleanText(text) {
+  // Define a regular expression that matches all newlines in the beginning of the string
+  const regex = /^[\n]+/
+  const cleanedText = text.replace(regex, '')
+  return cleanedText
+}
 
 // Create HTTP server
 http.createServer(app).listen(process.env.PORT)
