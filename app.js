@@ -42,7 +42,7 @@ app.post('/api/question', async (req, res) => {
   const llm = new OpenAI({
     modelName: 'gpt-3.5-turbo',
     //modelName: 'gpt-4',
-    concurrency: 10,
+    concurrency: 5,
     cache: true,
     temperature: 0,
   })
@@ -59,14 +59,6 @@ app.post('/api/question', async (req, res) => {
   }
 
   try {
-    // Instantiate the OpenAI model
-    const llm = new OpenAI({
-      modelName: 'gpt-3.5-turbo',
-      concurrency: 15,
-      cache: true,
-      temperature: 0.0,
-    })
-
     if (vectorStore) {
       // Load the Q&A map reduce chain
       const chain = VectorDBQAChain.fromLLM(llm, vectorStore)
