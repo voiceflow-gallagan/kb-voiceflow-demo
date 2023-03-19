@@ -60,21 +60,19 @@ app.post('/api/question', async (req, res) => {
 
   try {
     // Instantiate the OpenAI model
-    const llm = new PromptLayerOpenAI({
-      promptLayerApiKey: process.env.PROMPTLAYER_API_KEY,
+    const llm = new OpenAI({
       modelName: 'gpt-3.5-turbo',
-      //modelName: 'gpt-3.5-turbo-0301',
       concurrency: 15,
       cache: true,
-      temperature: 0.1,
-      pl_tags: ['voiceflow', 'kb'],
+      temperature: 0.0,
     })
 
-    // Load the Q&A map reduce chain
-    const chain = VectorDBQAChain.fromLLM(llm, vectorStore)
-    const response = await chain.call({
-      query: search,
-    })
+    if (vectorStore) {
+      // Load the Q&A map reduce chain
+      const chain = VectorDBQAChain.fromLLM(llm, vectorStore)
+      const response = await chain.call({
+        query: question,
+      })
 
       // Return the response to the user
       res.json({ response: response.text })
@@ -103,7 +101,7 @@ app.post('/api/parser', async (req, res) => {
   const loader = new CheerioWebBaseLoader(url)
   const docs = await loader.load()
 
-  const splitter = new RecursiveCharacterTextSplitter({
+  const textSplitter = new RecursiveCharacterTextSplitter({
     chunkSize: 2500,
     chunkOverlap: 200,
   })
