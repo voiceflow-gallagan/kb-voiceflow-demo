@@ -15,14 +15,16 @@ https://creator.voiceflow.com/prototype/643de15336147e000755e1f9
 
 ## running on replit
 1. Import the github repo into a new project
-2. Run npm install in the shell
-3. Run the following command in the shell to modify the Nix environment to support python: sed -i 's/];/  pkgs.python311\n  &/' replit.nix
+2. Run the following command in the shell to add a python package to the nix file: sed -i 's/];/  pkgs.python311\n  &/' replit.nix
+3. Run npm install in the shell 
 4. run npm install ngrok
 5. Add the key-pairs from the .env.example file into the secrets section of replit
 6. When you're ready to start - run ngrok http <port> in the shell to start a server
 7. Run npm start in the console to run the program
 
+_Fork this project directly on replit below_
 
+https://replit.com/@tubadsouza/Voiceflow-Replit-KB-Demo#.replit
 
 ## Node.js
 If you are running this on Node.js 16, either:
