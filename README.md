@@ -4,8 +4,27 @@
 This code utilizes Open AI GPT, Langchain, HNSWLib and Cheerio to fetch web content from URLs, create embeddings/vectors and save them in a local database. The knowledge base can then be used with GPT to answer questions.
 
 ## Quickstart Video
-[![Watch the video](https://s3.amazonaws.com/com.voiceflow.studio/share/CleanShot-2023-03-17-at-14.03.29/CleanShot-2023-03-17-at-14.03.29.png)](https://www.loom.com/share/a4fccc7aac7d48548006570f6ac98576)
+[![Overview of the code](https://s3.amazonaws.com/com.voiceflow.studio/share/CleanShot-2023-03-17-at-14.03.29/CleanShot-2023-03-17-at-14.03.29.png)](https://www.loom.com/share/a4fccc7aac7d48548006570f6ac98576)
 
+Overview of the Voiceflow project
+https://loom.com/share/fafab48dc911417eadba61c77ae1e573
+
+Voiceflow Project Template Link
+https://creator.voiceflow.com/prototype/643de15336147e000755e1f9
+
+
+## running on replit
+1. Import the github repo into a new project
+2. Run the following command in the shell to add a python package to the nix file: sed -i 's/];/  pkgs.python311\n  &/' replit.nix
+3. Run npm install in the shell 
+4. run npm install ngrok
+5. Add the key-pairs from the .env.example file into the secrets section of replit
+6. When you're ready to start - run ngrok http <port> in the shell to start a server
+7. Run npm start in the console to run the program
+
+_Fork this project directly on replit below_
+
+https://replit.com/@tubadsouza/Voiceflow-Replit-KB-Demo#.replit
 
 ## Node.js
 If you are running this on Node.js 16, either:
