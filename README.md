@@ -15,7 +15,8 @@ https://creator.voiceflow.com/prototype/643de15336147e000755e1f9
 
 ## running on replit
 1. Import the github repo into a new project
-2. Run the following command in the shell to add a python package to the nix file: sed -i 's/];/  pkgs.python311\n  &/' replit.nix
+2. Run the following command in the shell to add a python package to the nix file:
+```sed -i 's/];/  pkgs.python311\n  &/' replit.nix```
 3. Run npm install in the shell 
 4. run npm install ngrok
 5. Add the key-pairs from the .env.example file into the secrets section of replit
