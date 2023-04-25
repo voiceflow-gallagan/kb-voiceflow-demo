@@ -1,6 +1,6 @@
 
 hidden = [".config", "package-lock.json"]
-run = "npm start"
+run = "yarn start"
 
 [[hints]]
 regex = "Error \\[ERR_REQUIRE_ESM\\]"
@@ -77,4 +77,4 @@ pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
 start = "typescript-language-server --stdio"
 
 [deployment]
-run = ["sh", "-c", "npm start"]
+run = ["sh", "-c", "yarn start"]
